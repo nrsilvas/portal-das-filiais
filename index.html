@@ -149,7 +149,6 @@ html body{background:#F6F4EE !important;color:#211F1B !important}
       <select id="filial" class="filial-sel" aria-label="Filtrar por filial"></select>
       <button id="btnSync" class="btn-ghost" type="button" title="Buscar a versão mais recente antes de editar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4"/></svg>Sincronizar</button>
       <button id="btnSave" class="btn-ghost save" type="button" disabled><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M7 3v5h8V3M7 21v-7h10v7"/></svg>Salvar<span class="n" id="saveN" hidden>0</span></button>
-      <input type="file" id="fileSync" accept=".html,.htm,.json" hidden>
       <button id="btnAdd" class="btn-new" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 5v14M5 12h14"/></svg><span id="btnAddLbl">Adicionar</span></button>
     </div>
   </div>
@@ -170,16 +169,19 @@ html body{background:#F6F4EE !important;color:#211F1B !important}
   <div class="m-actions"><button type="button" class="btn danger" id="mDel" hidden>Excluir</button>
     <div class="r"><button type="button" class="btn" id="mCancel">Cancelar</button><button type="button" class="btn primary" id="mSave">Salvar</button></div></div>
 </div></div>
+</div></div>
 <div class="toast" id="toast" hidden></div>
-<script type="application/json" id="portal-data"></script>
 <script>
 (function(){
 "use strict";
 var COLS=["docs","canais","contatos"];
 var state={docs:[],canais:[],contatos:[]};
 var ui={tab:"docs",q:"",filial:"",chip:{docs:"",canais:"",contatos:""}};
-var db=null, canWrite=true, mode="local";
-var LS="portal-filiais-v1";
+var canWrite=true;
+var LS="portal-filiais-cache-v1";      // cópia local da última sincronização (só para abrir mais rápido)
+// Endereço da API do Worker. Vazio = mesmo domínio do portal (recomendado).
+// Se o portal ficar num domínio diferente do Worker, coloque a URL do Worker aqui, ex.: "https://portal-filiais.SEUUSUARIO.workers.dev"
+var API_BASE="";
 
 var CATS=["Procedimentos (POP)","Políticas e normas","Manuais de sistema","Formulários e modelos","Treinamentos","Comunicados"];
 var TIPOS=["E-mail","Teams","Telefone","WhatsApp","Chamado / Sistema","Portal / Link"];
@@ -207,39 +209,31 @@ function fmtDate(iso){if(!iso)return "";var d=new Date(iso+(iso.length===10?"T12
 function telHref(t){var d=String(t||"").replace(/[^\d+]/g,"");return d?"tel:"+d:"";}
 function waHref(t){var d=String(t||"").replace(/\D/g,"");if(!d)return "";if(d.length<=11)d="55"+d;return "https://wa.me/"+d;}
 
-/* ---------- storage ---------- */
-var pending={};           // key "col|id" -> {col,id,op:'set'|'delete',data}
-var lastSync=null, syncing=false, saving=false;
-var SRC=document.documentElement.outerHTML;   // cópia limpa da página, usada para gerar o arquivo salvo
+/* ---------- storage (Cloudflare Worker + D1) ---------- */
+var pending={};           // chave "col|id" -> {col,id,op:'set'|'delete',data,isNew}
+var lastSync=null, syncing=false, saving=false, online=false;
 function pendCount(){return Object.keys(pending).length;}
-function readEmbedded(){try{var el=document.getElementById("portal-data");var t=el&&el.textContent.trim();return t?JSON.parse(t):null;}catch(e){return null;}}
-function readLS(){try{return JSON.parse(localStorage.getItem(LS)||"null");}catch(e){return null;}}
 function applySnapshot(s){COLS.forEach(function(c){state[c]=s&&Array.isArray(s[c])?s[c]:[];});}
-function snapshot(){var o={savedAt:new Date().toISOString()};COLS.forEach(function(c){o[c]=state[c];});return o;}
-function loadLocal(){
-  var a=readEmbedded(),b=readLS(),pick=a;
-  if(b&&(!a||String(b.savedAt||"")>String(a.savedAt||"")))pick=b;
-  if(pick){applySnapshot(pick);lastSync=pick.savedAt||null;}
-}
+function cacheSave(){try{var o={savedAt:lastSync};COLS.forEach(function(c){o[c]=state[c];});localStorage.setItem(LS,JSON.stringify(o));}catch(e){}}
+function cacheLoad(){try{var o=JSON.parse(localStorage.getItem(LS)||"null");if(o){applySnapshot(o);lastSync=o.savedAt||null;}}catch(e){}}
 function setStatus(){
   var n=pendCount(),t;
   if(syncing)t="Sincronizando…";else if(saving)t="Salvando…";
   else if(n)t=n+(n>1?" alterações não salvas":" alteração não salva");
-  else if(lastSync)t=(mode==="db"?"Sincronizado":"Salvo")+" em "+new Date(lastSync).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
-  else t=mode==="db"?"Compartilhado com a equipe":"Salvo só neste navegador";
-  $("dot").className="dot"+(n?" warn":mode==="db"?" on":"");$("statusTxt").textContent=t;
-  var sv=$("btnSave");sv.disabled=!n||saving;$("saveN").textContent=n;$("saveN").hidden=!n;
+  else if(!online)t="Sem conexão com o servidor";
+  else if(lastSync)t="Sincronizado em "+new Date(lastSync).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+  else t="Compartilhado com a equipe";
+  $("dot").className="dot"+(n?" warn":online?" on":"");$("statusTxt").textContent=t;
+  $("btnSave").disabled=!n||saving;$("saveN").textContent=n;$("saveN").hidden=!n;
   $("btnSync").disabled=syncing||saving;
-  $("btnSave").hidden=$("btnSync").hidden=!canWrite&&mode==="db";
-  if(!canWrite&&mode==="db")$("btnSync").hidden=false;
 }
-function newId(col){return mode==="db"?db.collection(col).doc().id:"l"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function newId(){return (window.crypto&&crypto.randomUUID)?crypto.randomUUID():"id"+Date.now().toString(36)+Math.random().toString(36).slice(2,10);}
 function upsert(col,id,data){
   var isNewItem=!id;
   var now=new Date().toISOString();data.updatedAt=now;
   if(id){var old=state[col].find(function(x){return x.id===id;})||{};data=Object.assign({createdAt:old.createdAt||now},data);
     state[col]=state[col].map(function(x){return x.id===id?Object.assign({},data,{id:id}):x;});}
-  else{id=newId(col);data.createdAt=now;state[col].push(Object.assign({},data,{id:id}));}
+  else{id=newId();data.createdAt=now;state[col].push(Object.assign({},data,{id:id}));}
   var k0=col+"|"+id,wasNew=pending[k0]?pending[k0].isNew:isNewItem;pending[k0]={col:col,id:id,op:"set",data:data,isNew:wasNew};
   setStatus();render();return Promise.resolve();
 }
@@ -250,55 +244,30 @@ function remove(col,id){
   setStatus();render();return Promise.resolve();
 }
 
-/* Sincronizar: traz a versão mais recente antes de editar */
-function doSync(){
+function apiErr(r){return r.json().catch(function(){return {};}).then(function(j){throw {status:r.status,code:j.error||("HTTP "+r.status)};});}
+
+/* Sincronizar: busca os dados atuais no D1 através do Worker */
+function doSync(silent){
   if(pendCount()&&!confirm("Você tem "+pendCount()+" alteração(ões) não salvas. Sincronizar vai descartá-las. Continuar?"))return;
-  if(mode==="db"){
-    syncing=true;setStatus();
-    Promise.all(COLS.map(function(c){return db.collection(c).get().then(function(snap){return snap.docs.map(function(d){return Object.assign({},d.data(),{id:d.id});});});}))
-    .then(function(res){COLS.forEach(function(c,i){state[c]=res[i];});pending={};lastSync=new Date().toISOString();toast("Portal sincronizado.");})
-    .catch(function(e){console.error(e);toast("Não foi possível sincronizar agora.");})
-    .then(function(){syncing=false;setStatus();render();});
-  } else { $("fileSync").value="";$("fileSync").click(); }
-}
-function importFile(file){
-  var r=new FileReader();
-  r.onload=function(){
-    var txt=String(r.result||""),data=null;
-    try{
-      if(/^\s*\{/.test(txt))data=JSON.parse(txt);
-      else{var m=txt.match(/<script[^>]*id="portal-data"[^>]*>([\s\S]*?)<\/script>/);if(m&&m[1].trim())data=JSON.parse(m[1]);}
-    }catch(e){}
-    if(!data||!COLS.some(function(c){return Array.isArray(data[c]);})){toast("Esse arquivo não tem dados do portal.");return;}
-    applySnapshot(data);pending={};lastSync=data.savedAt||new Date().toISOString();
-    try{localStorage.setItem(LS,JSON.stringify(snapshot()));}catch(e){}
-    setStatus();render();toast("Dados sincronizados a partir do arquivo.");
-  };
-  r.readAsText(file);
+  syncing=true;setStatus();
+  fetch(API_BASE+"/api/data",{cache:"no-store"})
+  .then(function(r){if(!r.ok)return apiErr(r);return r.json();})
+  .then(function(d){applySnapshot(d);pending={};online=true;lastSync=d.savedAt||new Date().toISOString();cacheSave();if(!silent)toast("Portal sincronizado.");})
+  .catch(function(e){console.error("portal-filiais: sync",e);online=false;toast(e&&e.code==="db_missing"?"O banco D1 não está ligado ao Worker.":"Não foi possível sincronizar agora.");})
+  .then(function(){syncing=false;setStatus();render();});
 }
 
-/* Salvar: grava as alterações pendentes */
+/* Salvar: envia só as alterações pendentes para o Worker gravar no D1 */
 function doSave(){
-  var ops=Object.keys(pending).map(function(k){return pending[k];});if(!ops.length)return;
+  var ops=Object.keys(pending).map(function(k){var o=pending[k];return {col:o.col,id:o.id,op:o.op,data:o.data};});
+  if(!ops.length)return;
   saving=true;setStatus();
-  if(mode==="db"){
-    Promise.all(ops.map(function(o){var ref=db.collection(o.col).doc(o.id);return o.op==="delete"?ref.delete():ref.set(o.data);}))
-    .then(function(){pending={};lastSync=new Date().toISOString();toast("Alterações salvas para toda a equipe.");})
-    .catch(function(e){console.error(e);toast(e&&e.code==="not_granted"?"Você não tem permissão para editar este portal.":"Algumas alterações não foram salvas. Tente de novo.");})
-    .then(function(){saving=false;setStatus();});
-    return;
-  }
-  var snap=snapshot();
-  try{localStorage.setItem(LS,JSON.stringify(snap));}catch(e){}
-  var json=JSON.stringify(snap).replace(/</g,"\\u003c");
-  var html="<!doctype html>\n"+SRC.replace(/(<script[^>]*id="portal-data"[^>]*>)[\s\S]*?(<\/script>)/,function(_,a,b){return a+json+b;});
-  try{
-    var blob=new Blob([html],{type:"text/html"}),a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);a.download="portal-filiais.html";document.body.appendChild(a);a.click();
-    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
-    toast("Salvo. Baixamos o arquivo atualizado — substitua o anterior.");
-  }catch(e){toast("Salvo neste navegador.");}
-  pending={};lastSync=snap.savedAt;saving=false;setStatus();
+  fetch(API_BASE+"/api/save",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({ops:ops})})
+  .then(function(r){if(!r.ok)return apiErr(r);return r.json();})
+  .then(function(d){applySnapshot(d);pending={};online=true;lastSync=d.savedAt||new Date().toISOString();cacheSave();render();toast("Alterações salvas para toda a equipe.");})
+  .catch(function(e){console.error("portal-filiais: save",e);
+    toast(e&&e.code==="db_missing"?"O banco D1 não está ligado ao Worker.":"Não foi possível salvar agora. Suas alterações continuam pendentes.");})
+  .then(function(){saving=false;setStatus();});
 }
 window.addEventListener("beforeunload",function(e){if(pendCount()){e.preventDefault();e.returnValue="";}});
 
@@ -431,9 +400,8 @@ document.querySelectorAll(".tab").forEach(function(t){t.onclick=function(){ui.ta
 $("q").addEventListener("input",function(){ui.q=this.value;render();});
 $("filial").addEventListener("change",function(){ui.filial=this.value;render();});
 $("btnAdd").onclick=function(){openModal(ui.tab);};
-$("btnSync").onclick=doSync;
+$("btnSync").onclick=function(){doSync(false);};
 $("btnSave").onclick=doSave;
-$("fileSync").addEventListener("change",function(){if(this.files[0])importFile(this.files[0]);});
 $("main").addEventListener("click",function(ev){
   var b=ev.target.closest("[data-edit],[data-chip],[data-copy],[data-add]");if(!b)return;
   if(b.dataset.add){openModal(ui.tab);return;}
@@ -443,16 +411,7 @@ $("main").addEventListener("click",function(ev){
 });
 
 /* ---------- boot ---------- */
-loadLocal();setStatus();render();
-if(window.claude&&typeof window.claude.use==="function"){
-  window.claude.use("user").then(function(u){
-    if(u){var c=null;try{c=u.can("data.write");}catch(e){}if(c===false){canWrite=false;setStatus();render();}}
-  }).catch(function(){});
-  window.claude.use("db").then(function(d){
-    if(!d){setStatus();return;}
-    db=d;mode="db";COLS.forEach(function(col){state[col]=[];});
-    doSync();
-  }).catch(function(){setStatus();});
-}
+cacheLoad();setStatus();render();
+doSync(true);
 })();
 </script></body></html>
