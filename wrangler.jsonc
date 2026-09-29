@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "portal-das-filiais",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-29",
+
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "portal-das-filiais-db",
+      "database_id": "3b25b45b-f8d5-4e3c-8848-202ef09752b1"
+    }
+  ]
+}
