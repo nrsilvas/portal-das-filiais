@@ -254,7 +254,7 @@ html body{background:#F6F4EE !important;color:#211F1B !important}
     <button class="tab" role="tab" data-tab="docs" aria-selected="false">Documentações <span class="n" id="n-docs">0</span></button>
     <button class="tab" role="tab" data-tab="canais" aria-selected="false">Links úteis <span class="n" id="n-canais">0</span></button>
     <button class="tab" role="tab" data-tab="contatos" aria-selected="false">Diretório de contatos <span class="n" id="n-contatos">0</span></button>
-    <button class="tab" role="tab" data-tab="integracao" aria-selected="false">Integração</button>
+    <button class="tab" role="tab" data-tab="integracao" aria-selected="false">Portal Logística Martins</button>
     <span style="flex:1"></span>
     <span class="status" id="status"><span class="dot" id="dot"></span><span id="statusTxt">Conectando…</span></span>
   </nav>
@@ -516,9 +516,9 @@ function closeZoom(){$("zoom").hidden=true;$("zoomImg").removeAttribute("src");}
 /* ---------- Integração ---------- */
 var INTEGRACAO_URL="https://martinsdistribuidor.sharepoint.com/sites/SiteLogsticaMartins";
 function rIntegracao(){
-  return '<section class="intro"><div><h2>Integração</h2><p>Acesse o portal de integração da Logística Martins no SharePoint.</p></div></section>'+
-    '<article class="int-card"><div class="ov-ico">'+I["Portal / Link"]+'</div><div class="int-txt"><h3>Portal da Logística Martins</h3>'+
-    '<p>Site da Logística Martins no SharePoint. Abre em uma nova aba e usa o seu login corporativo.</p>'+
+  return '<section class="intro"><div><h2>Portal Logística Martins</h2><p>Acesse o site da Logística Martins no SharePoint.</p></div></section>'+
+    '<article class="int-card"><div class="ov-ico">'+I["Portal / Link"]+'</div><div class="int-txt"><h3>SharePoint da Logística Martins</h3>'+
+    '<p>Abre em uma nova aba e usa o seu login corporativo.</p>'+
     '<div class="int-url">'+esc(INTEGRACAO_URL.replace(/^https:\/\//,""))+'</div></div>'+
     '<a class="ov-go int-go" href="'+esc(INTEGRACAO_URL)+'" target="_blank" rel="noopener">Acessar portal '+I.ext+'</a></article>';
 }
