@@ -185,6 +185,14 @@ html body{background:#F6F4EE !important;color:#211F1B !important}
   .dots{left:18px;right:auto;bottom:16px}
 }
 @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+/* integração */
+.int-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);border-top:4px solid var(--brand-navy);padding:22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.int-txt{flex:1;min-width:220px}
+.int-txt h3{margin:0 0 4px;font-size:1.08rem}
+.int-txt p{margin:0;color:var(--ink-soft);font-size:.9rem}
+.int-url{margin-top:8px;font-size:.8rem;color:var(--ink-faint);word-break:break-all}
+.int-go{text-decoration:none;padding:10px 18px}
+@media (max-width:760px){.int-card{align-items:flex-start}}
 /* visão geral */
 .about{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
 .about img{width:100%;height:100%;min-height:240px;object-fit:cover;display:block}
@@ -246,6 +254,7 @@ html body{background:#F6F4EE !important;color:#211F1B !important}
     <button class="tab" role="tab" data-tab="docs" aria-selected="false">Documentações <span class="n" id="n-docs">0</span></button>
     <button class="tab" role="tab" data-tab="canais" aria-selected="false">Links úteis <span class="n" id="n-canais">0</span></button>
     <button class="tab" role="tab" data-tab="contatos" aria-selected="false">Diretório de contatos <span class="n" id="n-contatos">0</span></button>
+    <button class="tab" role="tab" data-tab="integracao" aria-selected="false">Integração</button>
     <span style="flex:1"></span>
     <span class="status" id="status"><span class="dot" id="dot"></span><span id="statusTxt">Conectando…</span></span>
   </nav>
@@ -403,6 +412,7 @@ function render(){
   if(cur&&fs.indexOf(cur)<0){ui.filial="";}
   document.querySelectorAll(".tab").forEach(function(t){t.setAttribute("aria-selected",t.dataset.tab===ui.tab?"true":"false");});
   if(ui.tab==="overview"){$("btnAdd").hidden=true;$("main").innerHTML=rOverview();startCarousel();return;}
+  if(ui.tab==="integracao"){clearInterval(carTimer);carTimer=null;$("btnAdd").hidden=true;$("main").innerHTML=rIntegracao();return;}
   clearInterval(carTimer);carTimer=null;
   $("btnAdd").hidden=!canWrite;$("btnAddLbl").textContent=COPY[ui.tab].add;
   var col=ui.tab,items=visible(col),all=visible(col,true),c=COPY[col];
@@ -503,6 +513,15 @@ function blobUrl(x){
     return blobCache[x.id]=URL.createObjectURL(new Blob([arr],{type:mime}));}catch(e){return x.img;}
 }
 function closeZoom(){$("zoom").hidden=true;$("zoomImg").removeAttribute("src");}
+/* ---------- Integração ---------- */
+var INTEGRACAO_URL="https://martinsdistribuidor.sharepoint.com/sites/SiteLogsticaMartins";
+function rIntegracao(){
+  return '<section class="intro"><div><h2>Integração</h2><p>Acesse o portal de integração da Logística Martins no SharePoint.</p></div></section>'+
+    '<article class="int-card"><div class="ov-ico">'+I["Portal / Link"]+'</div><div class="int-txt"><h3>Portal da Logística Martins</h3>'+
+    '<p>Site da Logística Martins no SharePoint. Abre em uma nova aba e usa o seu login corporativo.</p>'+
+    '<div class="int-url">'+esc(INTEGRACAO_URL.replace(/^https:\/\//,""))+'</div></div>'+
+    '<a class="ov-go int-go" href="'+esc(INTEGRACAO_URL)+'" target="_blank" rel="noopener">Acessar portal '+I.ext+'</a></article>';
+}
 function editBtn(col,id){return canWrite?'<button class="icon-btn" data-edit="'+col+'|'+esc(id)+'" aria-label="Editar">'+I.edit+'</button>':'';}
 function rDocs(items){
   var g={};items.forEach(function(x){var k=x.categoria||"Outros";(g[k]=g[k]||[]).push(x);});
