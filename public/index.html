@@ -193,6 +193,39 @@ html body{background:#F6F4EE !important;color:#211F1B !important}
 .int-url{margin-top:8px;font-size:.8rem;color:var(--ink-faint);word-break:break-all}
 .int-go{text-decoration:none;padding:10px 18px}
 @media (max-width:760px){.int-card{align-items:flex-start}}
+/* portal logística martins */
+.log-hero{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);border-top:4px solid var(--brand-navy);padding:22px;margin-bottom:22px}
+.log-hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.log-hero-top>div{flex:1;min-width:260px}
+.log-hero h3{margin:4px 0 6px;font-size:1.15rem;color:var(--brand-navy)}
+.log-hero p{margin:0;color:var(--ink-soft);font-size:.9rem;max-width:820px}
+.log-hero .slide-btn{background:var(--brand-navy);color:#fff}
+.log-hero .slide-btn:hover{background:var(--brand-blue)}
+.log-hero h4{margin:20px 0 10px;font-size:.95rem}
+.log-tag{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.log-table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+.log-table{border-collapse:collapse;width:100%;min-width:820px;font-size:.84rem}
+.log-table th{background:var(--brand-navy);color:#fff;text-align:left;font-weight:600;padding:9px 12px;white-space:nowrap}
+.log-table td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+.log-table tr:nth-child(even) td{background:var(--surface-2)}
+.log-table td.st{text-align:center;font-size:1.05rem}
+.log-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.log-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;display:grid;grid-template-columns:38px 1fr 18px;gap:12px;align-items:start;text-decoration:none;color:var(--ink);transition:border-color .15s,transform .15s}
+.log-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.log-card .ico{width:38px;height:38px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center}
+.log-card h4{margin:0 0 3px;font-size:.95rem;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.log-card p{margin:0;font-size:.84rem;color:var(--ink-soft)}
+.log-go{color:var(--ink-faint);padding-top:2px}
+.log-card:hover .log-go{color:var(--accent)}
+.log-nav{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px}
+.log-nav .chip{font-weight:600;padding:7px 14px}
+.log-n{font-size:.72rem;opacity:.75;margin-left:2px}
+.log-sec-head{margin:0 2px 14px}
+.log-sec-head h3{margin:0;font-size:1.05rem;color:var(--brand-navy)}
+.log-sec-head p{margin:3px 0 0;color:var(--ink-soft);font-size:.88rem;max-width:880px}
+.log-pilares{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
+.log-pilares div{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:.85rem;color:var(--ink-soft)}
+.log-pilares b{display:block;color:var(--ink);margin-bottom:4px;font-size:.88rem}
 /* visão geral */
 .about{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
 .about img{width:100%;height:100%;min-height:240px;object-fit:cover;display:block}
@@ -287,7 +320,7 @@ html body{background:#F6F4EE !important;color:#211F1B !important}
 var COLS=["docs","canais","contatos"];
 var TABS=["docs","canais","contatos"];
 var state={docs:[],canais:[],contatos:[]};
-var ui={slide:0,tab:"overview",q:"",filial:"",chip:{docs:"",canais:"",contatos:""}};
+var ui={logSec:"torre",slide:0,tab:"overview",q:"",filial:"",chip:{docs:"",canais:"",contatos:""}};
 var canWrite=true;
 var LS="portal-filiais-cache-v1";      // cópia local da última sincronização (só para abrir mais rápido)
 // Endereço da API do Worker. Vazio = mesmo domínio do portal (recomendado).
@@ -394,7 +427,7 @@ window.addEventListener("beforeunload",function(e){if(pendCount()){e.preventDefa
 function filiais(){var s={};TABS.forEach(function(c){state[c].forEach(function(x){var f=String(x.filial||"").trim();if(f&&norm(f)!=="todas")s[f]=1;});});return Object.keys(s).sort(function(a,b){return a.localeCompare(b,"pt-BR");});}
 function matchFilial(x){if(!ui.filial)return true;var f=String(x.filial||"").trim();return !f||norm(f)==="todas"||f===ui.filial;}
 function matchQ(x,fields){if(!ui.q)return true;var q=norm(ui.q);return fields.some(function(k){return norm(x[k]).indexOf(q)>=0;});}
-var F={docs:["titulo","categoria","descricao","responsavel","filial"],canais:["nome","tipo","endereco","quandoUsar","horario","filial","arquivoNome"],contatos:["nome","cargo","area","filial","telefone","email"]};
+var F={docs:["titulo","categoria","descricao","responsavel","filial"],canais:["nome","tipo","endereco","quandoUsar","horario","filial","arquivoNome","secao"],contatos:["nome","cargo","area","filial","telefone","email"]};
 var CHIPKEY={docs:"categoria",canais:"tipo",contatos:"area"};
 function visible(col,ignoreChip){return state[col].filter(function(x){return matchFilial(x)&&matchQ(x,F[col])&&(ignoreChip||!ui.chip[col]||x[CHIPKEY[col]]===ui.chip[col]);});}
 
@@ -513,14 +546,109 @@ function blobUrl(x){
     return blobCache[x.id]=URL.createObjectURL(new Blob([arr],{type:mime}));}catch(e){return x.img;}
 }
 function closeZoom(){$("zoom").hidden=true;$("zoomImg").removeAttribute("src");}
-/* ---------- Integração ---------- */
-var INTEGRACAO_URL="https://martinsdistribuidor.sharepoint.com/sites/SiteLogsticaMartins";
+/* ---------- Portal Logística Martins ---------- */
+// Somente links diretos dos itens (painéis, relatórios, pastas e sistemas). Sem links para as páginas do portal original.
+var SPO="https://martinsdistribuidor.sharepoint.com", ODR="https://martinsdistribuidor-my.sharepoint.com";
+var TAB="https://report.martins.com.br/#/site/Martins/views/";
+var LOG_SECOES=[
+ {id:"torre",t:"Torre de Controle",d:"Governança da operação logística em tempo real e a escala LOGICON de criticidade."},
+ {id:"indicadores",t:"Indicadores de desempenho",d:"Painéis de indicadores gerais, KPIs, OTIF, recursos e produtividade da distribuição e da armazenagem.",grupos:[
+  {t:"Visão geral",itens:[
+   {n:"Indicadores Gerais",d:"Eficiência Logística — Perfil Ideal de Frota (visão evolução).",u:TAB+"EficinciaLogstica-PerfilIdealdeFrota/VisoEvoluo?:iid=1",k:"Tableau"},
+   {n:"KPIs — Indicadores-Chave de Desempenho",d:"Folha de rosto dos indicadores-chave da logística.",u:TAB+"IndicadoresChavedeDesempenho/FolhadeRosto?:iid=1",k:"Tableau"},
+   {n:"OTIF",d:"Entregas no prazo e completas (On Time In Full).",u:SPO+"/sites/OTIF2/SitePages/TrainingHome.aspx?market=pt-BR",k:"SharePoint"},
+   {n:"Painel de Recursos",d:"Indicadores logísticos de recursos.",u:SPO+"/sites/xn--indicadoreslogsticos-recursoslogsticos-4qds2",k:"SharePoint"}]},
+  {t:"Produtividade",itens:[
+   {n:"Produtividade da Distribuição",d:"Dashboard de produtividade da distribuição.",u:"https://report.martins.com.br/#/signin?redirect=/site/Martins/views/PRODUTIVIDADEDISTRIBUIO/Dash",k:"Tableau"},
+   {n:"Produtividade da Armazenagem",d:"Dashboard de produtividade da armazenagem.",u:"https://report.martins.com.br/#/signin?redirect=/site/Martins/views/ProdutividadeArmazenagem/Dashboard",k:"Tableau"}]}]},
+ {id:"ns",t:"Nível de Serviço",d:"Principal indicador de qualidade do serviço logístico Martins: percentual de pedidos entregues dentro do prazo acordado com o cliente (previsto na agenda de roteirização). Cada cidade tem um prazo de entrega, informado nos sistemas de vendas e transmitido ao cliente.",grupos:[
+  {t:"Painéis",itens:[
+   {n:"Nível de Serviço",d:"Resumo do indicador de nível de serviço.",u:TAB+"NveldeServio/Resumo?:iid=1",k:"Tableau"},
+   {n:"Agenda de Roteirização",d:"Agenda do dia da roteirização, base dos prazos de entrega.",u:"https://report.martins.com.br/t/Martins/views/AgendaRoteirizao/AgendaDia/61c314fb-6d6b-48e0-a985-342a40855030/bdd90283-336d-4a78-b988-656c0fa7e489",k:"Tableau"},
+   {n:"Histórico — Nível de Serviço",d:"Histórico do indicador.",u:SPO+"/sites/xn--indicadoreslogsticos-nveldeservio-84c5qi",k:"SharePoint"}]}]},
+ {id:"frotas",t:"Frotas",d:"KM rodado (km percorridos no transporte), dispersão (km por entrega realizada) e consumo de combustível (km por litro abastecido): base para indicadores de performance da frota, planejamento de rotas e contrato de manutenção.",grupos:[
+  {t:"Índices de frota",itens:[
+   {n:"KM Rodado",d:"Quilômetros percorridos na etapa de transporte.",u:ODR+"/:f:/g/personal/henrique_santo_martins_com_br/ElDFcPVqZLNOghURASBw5YABSzt1CWya9Ok-MM_A_cOjjQ?e=iyXYFI",k:"Pasta"},
+   {n:"Consumo de Combustível",d:"Quilômetros por litro abastecido.",u:ODR+"/:f:/g/personal/henrique_santo_martins_com_br/EqGE-bpZF4ZDuMUx3yLoCbMBc2YJr-qTGuLDgG_EAxo6lg?e=hSWZwo",k:"Pasta"},
+   {n:"Dispersão",d:"Quilômetros percorridos por entrega realizada.",u:ODR+"/:f:/g/personal/henrique_santo_martins_com_br/EtQUpDjl-kZLtr1R-z7lte0B2C-h8F366BS90wF7Ppsk8Q?e=3BI9bY",k:"Pasta"}]},
+  {t:"Painéis e materiais",itens:[
+   {n:"Frotas",d:"Painel de frotas.",u:"https://app.powerbi.com/view?r=eyJrIjoiMDI2N2M3NGItZTNjOC00NWNlLTliYjQtMTQxYTM1ZTRjNmI3IiwidCI6IjBjODM3ZDFiLTk0ZGUtNDc2Yy1iZDhiLTc2N2NhZWE0YzllMiJ9&pageName=ReportSection14912a4fe9a26cb2b62d",k:"Power BI"},
+   {n:"Ocupação DTB e TRF",d:"Ocupação dos veículos na distribuição e na transferência, por entidade.",u:TAB+"OcupacaoDTBeTRF/VisoEntidade",k:"Tableau"},
+   {n:"Perfil Ideal de Frotas",d:"Materiais do estudo de perfil ideal de frota.",u:ODR+"/:f:/g/personal/gabriel_lopes_martins_com_br/EjQ920BDPBNGjQ3jhp0z8OcBD1SYjHtgbGFNiLRypCrYfQ?e=4zKhJG",k:"Pasta"},
+   {n:"Relatórios de Gestão de Frotas",d:"Site de relatórios de gestão de frotas.",u:SPO+"/sites/RelatriosGestodeFrotas",k:"SharePoint"},
+   {n:"Vídeo — Frota Ideal",d:"Saiba mais sobre o Frota Ideal.",u:ODR+"/my?id=/personal/crisliane_santos_martins_com_br/Documents/01-%20Log%C3%ADstica/Programa%20Excel%C3%AAncia%20Log%C3%ADstica%20Martins/Share%20Point%20PEX/Frota%20Ideal",k:"Vídeo"}]}]},
+ {id:"custos",t:"Custos e gestão",d:"Custeio logístico, planejamento orçamentário, manifestos e painéis de outros setores.",grupos:[
+  {t:"Custos e orçamento",itens:[
+   {n:"Custeio Logístico",d:"Custeio ABC (custeio baseado em atividades): quanto se gasta para distribuir um produto ou prestar um serviço.",u:ODR+"/:f:/g/personal/clesio_barbosa_martins_com_br/Epyl7fyLljlNpX8Bt6o1a7UBHbUWMrEUe72VmU31LEWexw?e=fNgdci",k:"Pasta"},
+   {n:"Planejamento Orçamentário (OBZ)",d:"Orçamento Base Zero: planejamento do período sem partir da base histórica.",u:ODR+"/:f:/g/personal/clesio_barbosa_martins_com_br/EjpJkwZtm-RIpUuV57NhDucBnbD7Z3RImNu_7iEGNup-kQ?e=RyOe1N",k:"Pasta"},
+   {n:"Receitas Logísticas",d:"Relatório de receitas logísticas.",u:"https://sasva.martins.com.br/links/resources/report?uri=/reports/reports/c38c93ac-d801-4166-bc24-0aa9687a4b47&page=vi65",k:"SAS VA"},
+   {n:"Descontos de terceiros (PJ e PF)",d:"Gestão de descontos de terceiros.",u:SPO+"/sites/GestodeDescontos-GestodeTerceiros",k:"SharePoint"}]},
+  {t:"Gestão de manifestos",itens:[
+   {n:"Manifestos — SAS VA",d:"Relatório de gestão de manifestos.",u:"https://sasva.martins.com.br/links/resources/report?uri=/reports/reports/1a142126-abf9-49c4-8bfc-cd18209bec4b&page=vi6",k:"SAS VA"},
+   {n:"Manifestos — arquivo Excel",d:"Pasta com a base em Excel.",u:ODR+"/:f:/g/personal/henrique_santo_martins_com_br/EkK0uFp6AsRJtS5VBizlXUUBYLQmUJDF1GUqECaH61y7RQ?e=caQ7Ik",k:"Pasta"}]},
+  {t:"Painéis de outros setores",itens:[
+   {n:"Informações Diárias",d:"Relatório de informações diárias.",u:"https://sasva.martins.com.br/SASVisualAnalytics/?appSwitcherMessage=%7b%22type%22:%22App.Open%22%2c%22data%22:%7b%22directive%22:%22SASVisualAnalytics%22%2c%22targetUri%22:%22/reports/reports/389fded8-c47d-47cd-abae-a9a6698083fa%22%2c%22targetPublicType%22:%22report%22%2c%22params%22:%7b%22page%22:%22vi6%22%7d%7d%7d",k:"SAS VA"},
+   {n:"APDs (Logística e GR)",d:"Relatório de gestão das APDs.",u:SPO+"/sites/RelatriodeGestodasAPDS",k:"SharePoint"},
+   {n:"Perfil Imóveis",d:"Painel de perfil dos imóveis.",u:"https://app.powerbi.com/view?r=eyJrIjoiNGM2NDEzYzItYWFjMi00ZTA1LWFmMTMtZTJlZmU2MzJmMTk2IiwidCI6IjBjODM3ZDFiLTk0ZGUtNDc2Yy1iZDhiLTc2N2NhZWE0YzllMiJ9&pageName=ReportSection",k:"Power BI"},
+   {n:"Painel Pricing",d:"Painel de pricing.",u:SPO+"/sites/Emproduo?market=pt-BR",k:"SharePoint"},
+   {n:"Agenda Hora Almart",d:"Pasta da agenda Hora Almart.",u:ODR+"/:f:/g/personal/clesio_barbosa_martins_com_br/EuXHUOLgo3BOlN4oU_PKWmwBVzFRzhZRWeJ43smLIc5dWA?e=KEScoR",k:"Pasta"}]}]},
+ {id:"treinamentos",t:"Programas e treinamentos",d:"Programa de Excelência Logística, materiais de treinamento e plano tático.",grupos:[
+  {t:"Programas e materiais",itens:[
+   {n:"Programa de Excelência Logística (PEX)",d:"Página do programa.",u:SPO+"/sites/ProgramadeExcelnciaLogsticaMartins",k:"SharePoint"},
+   {n:"E-book — Tratativas de Não Conformidades (PEX)",d:"Guia prático do treinamento Plano de Ação.",u:SPO+"/sites/SiteLogsticaMartins/Documentos%20Compartilhados/Treinamento%20Plano%20de%20A%C3%A7%C3%A3o/Ebook%20-%20Tratativas%20de%20N%C3%A3o%20Conformidades%20_%20PEX%20-%20Martins.pdf",k:"PDF"},
+   {n:"Vídeos — Planejador Local",d:"Vídeos de treinamento do Planejador Local (2ª versão).",u:ODR+"/personal/gabriel_lopes_martins_com_br/_layouts/15/onedrive.aspx?id=/personal/gabriel_lopes_martins_com_br/Documents/Treinamento%20Planejador%20Local/V%C3%ADdeos%20Prontos%20-%202%C2%AA%20Vers%C3%A3o",k:"Vídeo"},
+   {n:"Plano Tático Logística",d:"Planilha do plano tático por gerência e operação: status, prioridade, meta e real.",u:SPO+"/sites/SiteLogsticaMartins/SiteAssets/Plano%20Tatico%20Log..xlsm",k:"Excel"}]}]},
+ {id:"downloads",t:"Área de download",d:"Templates, apresentações de resultados, qualidade dos CDs e arquivos de apoio.",grupos:[
+  {t:"Arquivos",itens:[
+   {n:"Templates",d:"Modelos de documentos da logística.",u:ODR+"/:f:/g/personal/clesio_barbosa_martins_com_br/EnZJRlqtDMRJgl4LW3dkpQgBhT9Lj65i4wlYnrgIF0Sa7Q?e=XqaCqB",k:"Pasta"},
+   {n:"Reuniões de Resultados",d:"Apresentações das reuniões de resultados.",u:SPO+"/sites/ApresentaesReunies?market=pt-BR",k:"SharePoint"},
+   {n:"Qualidade dos CDs",d:"Site de qualidade dos centros de distribuição.",u:SPO+"/sites/QUALIDADEDOSCDS",k:"SharePoint"},
+   {n:"Políticas de Fracionados",d:"Políticas para pedidos fracionados.",u:ODR+"/:f:/g/personal/clesio_barbosa_martins_com_br/EqYhFx9By4hKu_qw0FX7-KsBVzbctp5e-kOXCej68DI8Ig?e=i8xsu9",k:"Pasta"},
+   {n:"Realizações",d:"Registro das realizações da logística.",u:ODR+"/:f:/g/personal/clesio_barbosa_martins_com_br/Et-uscc54itAmPuXDJRUu9cB2450jcNNGJG2DKyvP-cwlw?e=lx7gcm",k:"Pasta"},
+   {n:"Arquivos de Apoio",d:"Materiais de apoio.",u:ODR+"/:f:/g/personal/clesio_barbosa_martins_com_br/EhTC8QoS7f9Igj2m7pKgJbUByyPjdO5zzH8nDQJwc45x2g?e=7pi1cY",k:"Pasta"},
+   {n:"GDD Logístico",d:"Materiais do GDD logístico.",u:ODR+"/:f:/g/personal/clesio_barbosa_martins_com_br/Etzdql-kEfJMmHkPJBotCn4Bd96C6m_a3iKTR7fEyaju_A?e=IFtjn3",k:"Pasta"}]}]}
+];
+var LOGICON=[
+ ["🟢","Operação Nominal","Normal","Indicadores dentro do parâmetro","Monitoramento padrão e rotina operacional","Equipe Operacional","Monitorar"],
+ ["🟡","Ajuste Operacional","Atenção","Pequenos desvios observados","Monitoramento intensificado, pequenas ações corretivas","Equipe Operacional","Até 4 horas"],
+ ["🟠","Estresse Operacional","Alerta","Desvios significativos ou tendência preocupante","Avaliação imediata e ações corretivas lideradas pelo gestor","Gestor Operacional","Até 2 horas"],
+ ["🔴","Contingência Operacional","Emergência","Impacto elevado, necessidade urgente de intervenção","Acionamento urgente da liderança da Torre de Controle (PCL)","Supervisor Torre de Controle","Até 30 minutos"],
+ ["🚨","Colapso Operacional","Crise","Impacto crítico iminente ou em curso, risco extremo","Escalonamento imediato à Diretoria, ações estratégicas imediatas","Diretoria / Gerência PCL","Imediato"]
+];
+function logCard(x){
+  var ico=x.k==="PDF"||x.k==="Excel"?I.doc:x.k==="Pasta"?I.Arquivo:I["Portal / Link"];
+  return '<a class="log-card" href="'+esc(x.u)+'" target="_blank" rel="noopener"><div class="ico">'+ico+'</div><div><h4>'+esc(x.n)+' <span class="tag">'+esc(x.k)+'</span></h4><p>'+esc(x.d)+'</p></div><span class="log-go" aria-hidden="true">'+I.ext+'</span></a>';
+}
+function rTorre(){
+  return '<article class="log-hero"><h3>Torre de Controle — Logística</h3>'+
+    '<p>O centro que integra e coordena toda a operação logística em tempo real, conectando pessoas, processos e tecnologia para garantir entregas eficientes, seguras e ágeis aos clientes em todo o Brasil.</p>'+
+    '<div class="log-pilares"><div><b>Estrutura</b><span>PCL lidera o time, garante os SLAs e reporta resultados; gestores de processos integram transporte, atendimento, TI e fornecedores; tecnologia e dados mantêm os painéis e sistemas.</span></div>'+
+    '<div><b>Como funciona</b><span>Monitoramento em tempo real com WMS, TMS e painéis; alertas automáticos para desvios críticos; reuniões diárias de alinhamento; ações registradas para rastreabilidade.</span></div>'+
+    '<div><b>Pilares de governança</b><span>Transparência operacional, equidade nas relações, responsabilidade e prestação de contas, sustentabilidade e responsabilidade corporativa.</span></div></div>'+
+    '<h4>Escala LOGICON — Matriz de Criticidade</h4><div class="log-table-wrap"><table class="log-table"><thead><tr><th>Status</th><th>Escala LOGICON</th><th>Condição</th><th>Cenário operacional</th><th>Ação</th><th>Acionamento</th><th>Resposta</th></tr></thead><tbody>'+
+    LOGICON.map(function(r){return '<tr>'+r.map(function(c,i){return '<td'+(i===0?' class="st"':'')+'>'+esc(c)+'</td>';}).join("")+'</tr>';}).join("")+
+    '</tbody></table></div></article>';
+}
 function rIntegracao(){
-  return '<section class="intro"><div><h2>Portal Logística Martins</h2><p>Acesse o site da Logística Martins no SharePoint.</p></div></section>'+
-    '<article class="int-card"><div class="ov-ico">'+I["Portal / Link"]+'</div><div class="int-txt"><h3>SharePoint da Logística Martins</h3>'+
-    '<p>Abre em uma nova aba e usa o seu login corporativo.</p>'+
-    '<div class="int-url">'+esc(INTEGRACAO_URL.replace(/^https:\/\//,""))+'</div></div>'+
-    '<a class="ov-go int-go" href="'+esc(INTEGRACAO_URL)+'" target="_blank" rel="noopener">Acessar portal '+I.ext+'</a></article>';
+  var q=norm(ui.q),h='<section class="intro"><div><h2>Portal Logística Martins</h2><p>Painéis, relatórios, arquivos e sistemas da Logística Martins, organizados por seção. Os links abrem direto em cada item e usam o login corporativo.</p></div></section>';
+  if(q){ // busca: mostra o que combinar em todas as seções
+    var any=false;
+    LOG_SECOES.forEach(function(sec){
+      if(!sec.grupos){if(norm("torre de controle logicon criticidade governança").indexOf(q)>=0){any=true;h+='<div class="doc-group"><h3>'+esc(sec.t)+'</h3>'+rTorre()+'</div>';}return;}
+      var itens=[];sec.grupos.forEach(function(g){g.itens.forEach(function(x){if(norm(x.n+" "+x.d+" "+x.k+" "+g.t+" "+sec.t).indexOf(q)>=0)itens.push(x);});});
+      if(itens.length){any=true;h+='<div class="doc-group"><h3>'+esc(sec.t)+' · '+itens.length+'</h3><div class="log-grid">'+itens.map(logCard).join("")+'</div></div>';}
+    });
+    return h+(any?'':'<div class="empty"><h3>Nada encontrado</h3><p>Ajuste a busca.</p></div>');
+  }
+  var cur=LOG_SECOES.find(function(x){return x.id===ui.logSec;})||LOG_SECOES[0];ui.logSec=cur.id;
+  h+='<nav class="log-nav" aria-label="Seções da logística">'+LOG_SECOES.map(function(x){
+    var n=x.grupos?x.grupos.reduce(function(a,g){return a+g.itens.length;},0):0;
+    return '<button class="chip" data-logsec="'+x.id+'" aria-pressed="'+(x.id===cur.id)+'">'+esc(x.t)+(n?' <span class="log-n">'+n+'</span>':'')+'</button>';
+  }).join("")+'</nav>';
+  h+='<div class="log-sec-head"><h3>'+esc(cur.t)+'</h3><p>'+esc(cur.d)+'</p></div>';
+  if(!cur.grupos)return h+rTorre();
+  cur.grupos.forEach(function(g){h+='<div class="doc-group"><h3>'+esc(g.t)+' · '+g.itens.length+'</h3><div class="log-grid">'+g.itens.map(logCard).join("")+'</div></div>';});
+  return h;
 }
 function editBtn(col,id){return canWrite?'<button class="icon-btn" data-edit="'+col+'|'+esc(id)+'" aria-label="Editar">'+I.edit+'</button>':'';}
 function rDocs(items){
@@ -538,7 +666,16 @@ function rDocs(items){
   }).join("");
 }
 function chanHref(x){var a=x.endereco||"";switch(x.tipo){case "E-mail":return a?"mailto:"+a.trim():"";case "Telefone":return telHref(a);case "WhatsApp":return waHref(a);default:return safeUrl(a);}}
+var SEM_SECAO="Outros links";
+var SECOES_SUGERIDAS=["Sistemas","Portais e sites","Arquivos e manuais","Gente e benefícios","Atendimento e suporte"];
+function secaoDe(x){return String(x.secao||"").trim()||SEM_SECAO;}
 function rCanais(items){
+  var g={};items.forEach(function(x){var k=secaoDe(x);(g[k]=g[k]||[]).push(x);});
+  var ks=Object.keys(g).sort(function(a,b){if(a===SEM_SECAO)return 1;if(b===SEM_SECAO)return -1;return a.localeCompare(b,"pt-BR");});
+  if(ks.length===1&&ks[0]===SEM_SECAO)return rCanaisGrid(g[SEM_SECAO]);
+  return ks.map(function(k){return '<div class="doc-group"><h3>'+esc(k)+' · '+g[k].length+'</h3>'+rCanaisGrid(g[k])+'</div>';}).join("");
+}
+function rCanaisGrid(items){
   items=items.slice().sort(function(a,b){return (b.urgente?1:0)-(a.urgente?1:0)||String(a.nome).localeCompare(String(b.nome),"pt-BR");});
   return '<div class="chan-grid">'+items.map(function(x){
     var file=isFile(x);
@@ -594,6 +731,8 @@ function openModal(col,id){
   var areas={};state.contatos.forEach(function(x){if(x.area)areas[x.area]=1;});
   var h=col==="canais"?canalForm(v,!!id):FORMS[col].map(function(f){return Array.isArray(f)?'<div class="two">'+f.map(function(k){return fieldHtml(k,v);}).join("")+'</div>':fieldHtml(f,v);}).join("");
   h+='<datalist id="dl_categoria">'+CATS.map(function(o){return '<option value="'+esc(o)+'">';}).join("")+'</datalist>';
+  var secs={};SECOES_SUGERIDAS.forEach(function(x){secs[x]=1;});state.canais.forEach(function(x){if(x.secao)secs[x.secao]=1;});
+  h+='<datalist id="dl_secao">'+Object.keys(secs).sort(function(a,b){return a.localeCompare(b,"pt-BR");}).map(function(o){return '<option value="'+esc(o)+'">';}).join("")+'</datalist>';
   h+='<datalist id="dl_filial">'+filiais().map(function(o){return '<option value="'+esc(o)+'">';}).join("")+'</datalist>';
   h+='<datalist id="dl_area">'+Object.keys(areas).map(function(o){return '<option value="'+esc(o)+'">';}).join("")+'</datalist>';
   $("mForm").innerHTML=h;$("mErr").textContent="";$("mErr").className="err";$("mSave").disabled=false;
@@ -608,6 +747,7 @@ function canalForm(v,editingExisting){
     '<label><input type="radio" name="conteudo" value="link"'+(tipoC==="link"?' checked':'')+(editingExisting&&tipoC==="arquivo"?'':'')+'><span>🔗 Link</span></label>'+
     '<label><input type="radio" name="conteudo" value="arquivo"'+(tipoC==="arquivo"?' checked':'')+'><span>📎 Arquivo</span></label></div></div>';
   h+='<div class="field"><label for="f_nome">Nome *</label><input id="f_nome" type="text" value="'+esc(v.nome||"")+'" placeholder="Ex.: Portal de RH"></div>';
+  h+='<div class="field"><label for="f_secao">Seção</label><input id="f_secao" type="text" list="dl_secao" value="'+esc(v.secao||"")+'" placeholder="Ex.: Sistemas"><small class="hint">Escolha uma seção existente ou digite uma nova. Sem seção, o item vai para "'+SEM_SECAO+'".</small></div>';
   h+='<div class="field" id="boxLink"><label for="f_endereco">URL *</label><input id="f_endereco" type="text" value="'+esc(isFile(v)?"":(v.endereco||""))+'" placeholder="https://…"></div>';
   h+='<div class="field" id="boxFile">'+
     (isFile(v)?'<label>Arquivo atual</label><div class="file-cur"><span>📎 '+esc(v.arquivoNome||"arquivo")+'</span><small>'+fmtSize(v.arquivoTamanho)+'</small></div><label for="f_arquivo" style="margin-top:6px">Substituir arquivo (opcional)</label>':'<label for="f_arquivo">Arquivo *</label>')+
@@ -636,7 +776,7 @@ function uploadFile(id,file,fields,col){
 }
 function saveCanal(){
   var cur=editing.id?state.canais.find(function(x){return x.id===editing.id;}):null;
-  var m=canalMode(),nome=$("f_nome").value.trim(),desc=$("f_quandoUsar").value.trim(),filial=$("f_filial").value.trim();
+  var m=canalMode(),nome=$("f_nome").value.trim(),desc=$("f_quandoUsar").value.trim(),filial=$("f_filial").value.trim(),secao=$("f_secao").value.trim();
   if(!nome){msg("Preencha o nome.",true);return;}
   var base=cur?Object.assign({},cur):{};delete base.id;
   if(m==="link"){
@@ -645,7 +785,7 @@ function saveCanal(){
     var keepTipo=cur&&!isFile(cur)&&cur.tipo&&cur.tipo!=="Arquivo"?cur.tipo:"Portal / Link";
     if(keepTipo==="Portal / Link"&&!safeUrl(url)){msg("A URL precisa começar com http:// ou https://.",true);return;}
     ["arquivoNome","arquivoChave","arquivoTamanho","arquivoMime","arquivoEm"].forEach(function(k){delete base[k];});
-    var d=Object.assign(base,{nome:nome,endereco:url,quandoUsar:desc,filial:filial,tipo:keepTipo,conteudo:"link"});
+    var d=Object.assign(base,{nome:nome,endereco:url,quandoUsar:desc,filial:filial,secao:secao,tipo:keepTipo,conteudo:"link"});
     upsert("canais",editing.id,d).then(function(){closeModal();toast(cur&&isFile(cur)?"Pronto. Ao Salvar, o arquivo antigo será removido.":"Pronto. Clique em Salvar para gravar.");});
     return;
   }
@@ -653,12 +793,12 @@ function saveCanal(){
   if(!file&&!isFile(cur)){msg("Escolha um arquivo.",true);return;}
   if(file&&file.size>MAX_UPLOAD){msg("O arquivo passa de 95 MB.",true);return;}
   if(!file){ // só alterou nome/descrição de um arquivo existente
-    upsert("canais",editing.id,Object.assign(base,{nome:nome,quandoUsar:desc,filial:filial,tipo:"Arquivo",conteudo:"arquivo"})).then(function(){closeModal();toast("Pronto. Clique em Salvar para gravar.");});
+    upsert("canais",editing.id,Object.assign(base,{nome:nome,quandoUsar:desc,filial:filial,secao:secao,tipo:"Arquivo",conteudo:"arquivo"})).then(function(){closeModal();toast("Pronto. Clique em Salvar para gravar.");});
     return;
   }
   var id=editing.id||newId(),b=$("mSave");
   b.disabled=true;$("mCancel").disabled=true;msg("Enviando arquivo…",false);
-  uploadFile(id,file,{nome:nome,quandoUsar:desc,filial:filial}).then(function(res){
+  uploadFile(id,file,{nome:nome,quandoUsar:desc,filial:filial,secao:secao}).then(function(res){
     var item=res.item;
     state.canais=state.canais.filter(function(x){return x.id!==item.id;}).concat([item]);
     delete pending["canais|"+item.id];
@@ -696,9 +836,10 @@ $("btnAdd").onclick=function(){openModal(ui.tab);};
 $("btnSync").onclick=function(){doSync(false);};
 $("btnSave").onclick=doSave;
 $("main").addEventListener("click",function(ev){
-  var b=ev.target.closest("[data-edit],[data-chip],[data-copy],[data-add],[data-go],[data-slide],[data-zoom]");if(!b)return;
+  var b=ev.target.closest("[data-edit],[data-chip],[data-copy],[data-add],[data-go],[data-slide],[data-zoom],[data-logsec]");if(!b)return;
   if(b.dataset.slide){var v=b.dataset.slide;goSlide(v==="prev"?ui.slide-1:v==="next"?ui.slide+1:Number(v));return;}
   if(b.dataset.zoom){openZoom(b.dataset.zoom);return;}
+  if(b.dataset.logsec){ui.logSec=b.dataset.logsec;render();return;}
   if(b.dataset.go){ui.tab=b.dataset.go;render();window.scrollTo(0,0);return;}
   if(b.dataset.add){openModal(ui.tab);return;}
   if(b.hasAttribute("data-chip")){ui.chip[ui.tab]=b.dataset.chip;render();return;}
