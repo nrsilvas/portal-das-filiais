@@ -496,6 +496,17 @@ body{padding-inline:0 !important}
 .ff-btns .hint{flex-basis:100%}
 @media (max-width:1100px){.org-row{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));padding-top:6px}.org-node::before,.org-node::after{display:none}}
 @media (max-width:560px){.org-top{grid-template-columns:1fr}.org-ass{justify-content:center}.org-dash{display:none}.org-row{grid-template-columns:repeat(2,minmax(0,1fr))}.pc-root{min-width:0}}
+
+/* categorias do organograma */
+.oc-nav{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:8px;margin:4px 0 6px}
+.oc-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--btn-line);border-radius:10px;padding:10px 12px;cursor:pointer;color:var(--brand-navy);box-shadow:var(--shadow);transition:border-color .15s,background .15s}
+.oc-btn:hover{border-color:var(--brand-blue)}
+.oc-t{font-weight:700;font-size:.86rem;line-height:1.25}
+.oc-n{font-size:.74rem;color:var(--ink-faint)}
+.oc-btn.on{background:var(--brand-navy);border-color:var(--brand-navy);color:#fff}
+.oc-btn.on .oc-n{color:#C6D3E3}
+.oc-btn:focus-visible{outline:2px solid var(--brand-sky);outline-offset:2px}
+@media (max-width:560px){.oc-nav{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style><script>(function(){var r=document.documentElement;function f(){if(r.getAttribute("data-theme")!=="light")r.setAttribute("data-theme","light");}f();new MutationObserver(f).observe(r,{attributes:true,attributeFilter:["data-theme","class"]});})();</script></head><body>
 <div id="app">
 <div class="side-scrim" id="sideScrim" hidden></div>
@@ -555,7 +566,7 @@ body{padding-inline:0 !important}
 var COLS=["docs","canais","contatos"];
 var TABS=["docs","canais","contatos"];
 var state={docs:[],canais:[],contatos:[]};
-var ui={logSec:"indicadores",slide:0,tab:"overview",q:"",filial:"",chip:{docs:"",canais:"",contatos:""}};
+var ui={orgCat:"",logSec:"indicadores",slide:0,tab:"overview",q:"",filial:"",chip:{docs:"",canais:"",contatos:""}};
 var canWrite=true;
 var LS="portal-filiais-cache-v1";      // cópia local da última sincronização (só para abrir mais rápido)
 // Endereço da API do Worker. Vazio = mesmo domínio do portal (recomendado).
@@ -1137,22 +1148,28 @@ function rContatos(items){
     var l=items.slice().sort(function(a,b){return String(a.nome).localeCompare(String(b.nome),"pt-BR");});
     return '<div class="doc-group"><h3>Resultados · '+l.length+'</h3><div class="pc-grid">'+l.map(function(x){return pCard(x);}).join("")+'</div></div>';
   }
-  var t=orgTree(state.contatos),roots=t.kids[""]||[],h="",loose=[];
+  var t=orgTree(state.contatos),roots=t.kids[""]||[],secs=[],loose=[];
+  function equipe(id){var n=0,st=[id];while(st.length){(t.kids[st.pop()]||[]).forEach(function(k){n++;st.push(k.id);});}return n;}
   roots.forEach(function(r){
     if(!(t.kids[r.id]||[]).length){loose.push(r);return;}
-    h+='<section class="org-sec">'+orgBlock(r,t,true)+'</section>';
-    // seções por área: cada pessoa com equipe ganha sua própria seção, em qualquer nível
+    secs.push({id:r.id,t:r.area||r.cargo||r.nome,n:equipe(r.id)+1,root:true,html:'<section class="org-sec">'+orgBlock(r,t,true)+'</section>'});
+    // uma categoria para cada pessoa com equipe, em qualquer nível
     var fila=(t.kids[r.id]||[]).filter(function(k){return !k.assessoria;}).slice();
     while(fila.length){
       var p=fila.shift(),eq=t.kids[p.id]||[];
       if(!eq.length)continue;
-      h+='<section class="org-sec org-area" id="org-'+esc(p.id)+'"><div class="com-head"><h3>'+esc(p.area||p.cargo||p.nome)+'</h3><button class="org-up" data-orgto="top">Voltar ao topo ↑</button></div>'+orgBlock(p,t,false)+'</section>';
+      secs.push({id:p.id,t:p.area||p.cargo||p.nome,n:equipe(p.id)+1,html:'<section class="org-sec org-area" id="org-'+esc(p.id)+'"><div class="com-head"><h3>'+esc(p.area||p.cargo||p.nome)+'</h3></div>'+orgBlock(p,t,false)+'</section>'});
       fila=eq.filter(function(k){return !k.assessoria;}).concat(fila);
     }
   });
   if(loose.length){loose.sort(function(a,b){return String(a.nome).localeCompare(String(b.nome),"pt-BR");});
-    h+='<section class="org-sec"><div class="com-head"><h3>Outros contatos · '+loose.length+'</h3></div><p class="log-home-sub">Pessoas cadastradas sem posição no organograma. Para encaixar alguém, edite e escolha a quem a pessoa responde.</p><div class="pc-grid">'+loose.map(function(x){return pCard(x);}).join("")+'</div></section>';}
-  return h;
+    secs.push({id:"__outros",t:"Outros contatos",n:loose.length,html:'<section class="org-sec"><div class="com-head"><h3>Outros contatos · '+loose.length+'</h3></div><p class="log-home-sub">Pessoas cadastradas sem posição no organograma. Para encaixar alguém, edite e escolha a quem a pessoa responde.</p><div class="pc-grid">'+loose.map(function(x){return pCard(x);}).join("")+'</div></section>'});}
+  if(ui.orgCat&&!secs.some(function(x){return x.id===ui.orgCat;}))ui.orgCat="";
+  var total=state.contatos.length;
+  var nav='<nav class="oc-nav" aria-label="Categorias do organograma"><button class="oc-btn'+(!ui.orgCat?' on':'')+'" data-orgcat="" aria-pressed="'+(!ui.orgCat)+'"><span class="oc-t">Todas</span><span class="oc-n">'+total+' '+(total===1?"pessoa":"pessoas")+'</span></button>'+
+    secs.map(function(x){var on=ui.orgCat===x.id;return '<button class="oc-btn'+(on?' on':'')+'" data-orgcat="'+esc(x.id)+'" aria-pressed="'+on+'"><span class="oc-t">'+esc(x.t)+'</span><span class="oc-n">'+x.n+' '+(x.n===1?"pessoa":"pessoas")+'</span></button>';}).join("")+'</nav>';
+  var show=ui.orgCat?secs.filter(function(x){return x.id===ui.orgCat;}):secs;
+  return nav+show.map(function(x){return x.html;}).join("");
 }
 /* formulário da pessoa */
 var fotoNova;
@@ -1343,10 +1360,11 @@ $("btnAdd").onclick=function(){openModal(ui.tab);};
 $("btnSync").onclick=function(){doSync(false);};
 $("btnSave").onclick=doSave;
 $("main").addEventListener("click",function(ev){
-  var b=ev.target.closest("[data-edit],[data-chip],[data-copy],[data-add],[data-go],[data-slide],[data-zoom],[data-logsec],[data-zoomimg],[data-vid],[data-play],[data-guia],[data-orgto]");if(!b)return;
+  var b=ev.target.closest("[data-edit],[data-chip],[data-copy],[data-add],[data-go],[data-slide],[data-zoom],[data-logsec],[data-zoomimg],[data-vid],[data-play],[data-guia],[data-orgto],[data-orgcat]");if(!b)return;
   if(b.dataset.slide){var v=b.dataset.slide;goSlide(v==="prev"?ui.slide-1:v==="next"?ui.slide+1:Number(v));return;}
   if(b.dataset.zoom){openZoom(b.dataset.zoom);return;}
-  if(b.dataset.orgto){var tg=b.dataset.orgto==="top"?$("main"):document.getElementById("org-"+b.dataset.orgto);if(tg)tg.scrollIntoView({behavior:"smooth",block:"start"});return;}
+  if(b.dataset.orgto){ui.orgCat=b.dataset.orgto==="top"?"":b.dataset.orgto;render();var mm=$("main");if(mm)mm.scrollIntoView({behavior:"smooth",block:"start"});return;}
+  if(b.hasAttribute("data-orgcat")){ui.orgCat=b.dataset.orgcat;render();return;}
   if(b.dataset.guia){var gv=b.dataset.guia;if(gv==="pause"){guiaPaused=!guiaPaused;b.textContent=guiaPaused?"▶":"❚❚";b.setAttribute("aria-label",(guiaPaused?"Retomar":"Pausar")+" troca automática");startGuias();return;}goGuia(gv==="prev"?(ui.guia||0)-1:gv==="next"?(ui.guia||0)+1:Number(gv));return;}
   if(b.dataset.vid){var vv=b.dataset.vid;goVid(vv==="prev"?(ui.vid||0)-1:vv==="next"?(ui.vid||0)+1:Number(vv));return;}
   if(b.dataset.play){playVid(b.dataset.play);return;}
